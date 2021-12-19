@@ -13,9 +13,9 @@ COPY go.mod .
 
 RUN go mod tidy
 
-COPY *.go .
+COPY *.go ./
 
-RUN go build -o ./docker-golang-http
+RUN go build -o ./docker-golang-http main.go
 
 # Deploy
 FROM gcr.io/distroless/base-debian10
