@@ -9,7 +9,7 @@ ENV GOARCH=wasm
 ENV GOOS=js
 
 WORKDIR /app
-COPY go,mod .
+COPY go.mod .
 
 RUN go mod tidy
 
