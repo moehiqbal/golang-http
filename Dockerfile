@@ -1,26 +1,10 @@
-# Build
-FROM golang:1.17-buster AS build
+FROM golang:1.17-alpine3.15 AS build-env
+RUN mkdir /go/src/app && apk update && apk add git
+ADD main.go /go/src/app/
+WORKDIR /go/src/app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o app .
 
-ENV GO111MODULE=on
-ENV CGO_ENABLED=0
-ENV GOOS=linux
-ENV GOARCH=amd64
-ENV GOARCH=wasm
-ENV GOOS=js
-
+FROM scratch
 WORKDIR /app
-COPY go.mod .
-
-RUN go mod tidy
-
-COPY *.go ./
-
-RUN go build -o ./docker-golang-http main.go
-
-# Deploy
-FROM gcr.io/distroless/base-debian10
-WORKDIR /app
-COPY --from=build /docker-golang-http /docker-golang-http
-EXPOSE 3000
-USER nonroot:nonroot
-ENTRYPOINT ["/docker-golang-http"]
+COPY --from=build-env /go/src/app/app .
+ENTRYPOINT [ "./app" ]
